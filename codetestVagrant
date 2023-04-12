@@ -1,0 +1,53 @@
+import java.util.*;
+class RecentlyPlayed {
+    private final int capacity;
+    private final Map<String, Deque<String>> cache;
+
+    public RecentlyPlayed(int capacity) {
+        this.capacity = capacity;
+        this.cache = new HashMap<>();
+    }
+
+    public List<String> getRecentSongs(String user) {
+        Deque<String> songs = cache.get(user);
+        if (songs == null) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<>(songs);
+        Collections.reverse(result);
+        return result.subList(0, Math.min(capacity, result.size()));
+    }
+
+    public void addSong(String song, String user) {
+        Deque<String> songs = cache.computeIfAbsent(user, k -> new ArrayDeque<>());
+        songs.remove(song); // remove the song from its current position (if present)
+        songs.addFirst(song); // add the song to the front of the deque
+        if (songs.size() > capacity) {
+            songs.removeLast(); // remove the least recently played song
+        }
+    }
+}
+
+class MainClass {
+    public static void main(String[] arg) {
+        RecentlyPlayed rp = new RecentlyPlayed(3);
+        rp.addSong("S1","U1");
+        rp.addSong("S2","U1");
+        rp.addSong("S3","U1");
+        System.out.println("The playlist would look like");
+        List<String> playedSongs = rp.getRecentSongs("U1");
+        System.out.println(playedSongs.toString());
+        //when S4 is played
+        System.out.println("when S4 is played");
+        rp.addSong("S4","U1");
+        System.out.println(rp.getRecentSongs("U1").toString());
+        //When S2 song is played
+        System.out.println("When S2 song is played");
+        rp.addSong("S2","U1");
+        System.out.println(rp.getRecentSongs("U1").toString());
+        //When S1 song is played
+        System.out.println("When S1 song is played");
+        rp.addSong("S1","U1");
+        System.out.println(rp.getRecentSongs("U1").toString());
+    }
+}
